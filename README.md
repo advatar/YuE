@@ -162,7 +162,7 @@ Measured on an M5 Max with 128 GB unified memory (macOS, PyTorch 2.10, `examples
 | Total | 35–42 s of 48 kHz stereo audio in 82–85 s |
 | Peak memory footprint | 15.6–17.7 GB |
 
-Time grows faster than song length. A longer folk-ballad request planned a 3942-token score at 10.7 tokens/s and produced 60.5 s of audio in 615 s, because token throughput falls as the context grows. On a Mac, decoding runs eagerly because CUDA graphs are unavailable. These figures are environment checks, not quality or benchmark results.
+In the same session, two of five requests ran away instead of finishing normally. One planned a 3942-token score that failed `abc_tools.py inspect` and rendered audio that was near-silent after 15 s, without reporting truncation. The other was still generating at 6791 song tokens (normal runs ended near 1000) after 9 minutes, when the process was killed. Throughput fell to 10–12 tokens/s in both. Whether this is specific to MPS has not been checked. Inspect the score before trusting the audio, and retry with another seed if planning or generation runs far past about 1000 tokens. On a Mac, decoding runs eagerly because CUDA graphs are unavailable. These figures are environment checks, not quality or benchmark results.
 
 [Generation guide](docs/generation.md) · [Original example inputs](examples/README.md) · [v0.1.6 wheel archive](https://github.com/multimodal-art-projection/YuE/releases/download/yue2-v0.1.6/yue2_infer-0.1.6-py3-none-any.whl)
 
