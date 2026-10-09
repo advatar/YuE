@@ -139,6 +139,31 @@ with YuE2Pipeline.from_pretrained("m-a-p/YuE2-3B", device="cuda") as pipe:
 | `cot="off"` | Generate directly from lyrics and style |
 | `abc=...` | Supply your own score in `full` or `melody` mode |
 
+### Apple Silicon (MPS)
+
+YuE2 also runs on Apple Silicon Macs through PyTorch's MPS backend without code changes. Use the `torch` backend (the default). The `vllm` backend and `fp8` quantization require NVIDIA GPUs.
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install .
+PYTORCH_ENABLE_MPS_FALLBACK=1 yue2 generate --device mps \
+  --request examples/song.json --output outputs/first-song
+```
+
+`PYTORCH_ENABLE_MPS_FALLBACK=1` runs any operator that MPS lacks on the CPU instead of failing. After the first download, add `--offline` to skip the Hugging Face lookup. In Python, pass `device="mps"` (or `device="auto"`, which picks CUDA, then MPS, then CPU).
+
+Measured on an M5 Max with 128 GB unified memory (macOS, PyTorch 2.10, `examples/song.json`, models cached):
+
+| Stage | Two runs |
+|---|---|
+| Score planning | 19–31 tokens/s |
+| Song token generation | 28–30 tokens/s |
+| Total | 35–42 s of 48 kHz stereo audio in 82–85 s |
+| Peak memory footprint | 15.6–17.7 GB |
+
+On a Mac, decoding runs eagerly because CUDA graphs are unavailable. These figures are environment checks, not quality or benchmark results.
+
 [Generation guide](docs/generation.md) · [Original example inputs](examples/README.md) · [v0.1.6 wheel archive](https://github.com/multimodal-art-projection/YuE/releases/download/yue2-v0.1.6/yue2_infer-0.1.6-py3-none-any.whl)
 
 ## Cover a song
